@@ -76,5 +76,20 @@ class Client(ZThing):
         self.id = await self.get("uid")
         return self
 
-    async def namecard_slice(self, size: int = 30) -> list[Namecard]:
-        ...
+    def namecard_slice(self, size: int = 30, page: str = None) -> dict[str, any]:
+        from ..objects import Profile
+        return self.request_paged_route(
+            "GET",
+            "/users/namecards",
+            size = size, page = page,
+            transformer = lambda it : Profile(it["uid"], data = it, client = self)
+        )
+
+    @property
+    def namecards(self) -> generator[Profile]:
+        from ..objects import Profile
+        return self.paged_generator(
+            "GET",
+            "/users/namecards",
+            transformer = lambda it : Profile(it["uid"], data = it, client = self)
+        )
