@@ -91,6 +91,11 @@ class Profile(ZThing):
         return self.get("nameCardEnabled", casted = bool)
 
     @property
+    def name_card_background(self) -> dict[str, any]:
+        # TODO: media object
+        return self.get("nameCardBackground")
+
+    @property
     def push_enabled(self) -> bool:
         return self.get("pushEnabled", casted = bool)
 
