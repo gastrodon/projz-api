@@ -48,6 +48,32 @@ class ZThing:
     def request_route(self, method: str, route: str, *args, **kwargs) -> httpx.response:
         return self.request(method, f"{self.api}{route}", *args, **kwargs)
 
+    async def request_paged_route(
+        self, method: str, route: str, transformer: function = noop,
+        size: int = 30, page: str = None, **kwargs
+    ) -> dict[str, any]:
+        response: dict[str, any] = await self.request_route(
+            method, route,
+            params = { "size": size, "pageToken": page, **kwargs.get("params", {}) },
+        )
+
+        return {
+            "data": [ transformer(it) for it in response["list"] ],
+            "page": response.get("pagination", {}).get("nextPageToken"),
+        }
+
+    async def paged_generator(self, method: str, route: str, transformer: function = noop) -> generator[any]:
+        page: str = None
+
+        while True:
+            buffer: dict[str, any] = await self.request_paged_route(method, route, transformer = transformer, page = page)
+            for it in buffer["data"]:
+                yield it
+
+            page = buffer["page"]
+            if not page:
+                return
+
     async def get(self, key: str, default: any = None, *, casted: any = noop) -> any:
         if (fetched := (await self.data).get(key)) != None:
             return casted(fetched)
