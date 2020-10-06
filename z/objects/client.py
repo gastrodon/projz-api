@@ -40,7 +40,6 @@ class Client(ZThing):
     def has_profile(self) -> bool:
         return self.get("hasProfile", casted = bool)
 
-
     async def _get_self_profile(self) -> Profile:
         if not self._sid and not self._profile:
             return None
@@ -93,3 +92,7 @@ class Client(ZThing):
             "/users/namecards",
             transformer = lambda it : Profile(it["uid"], data = it, client = self)
         )
+
+    @property
+    def alerts(self) -> dict[str, int]:
+        return self.request_route("GET", "/alerts/check")
