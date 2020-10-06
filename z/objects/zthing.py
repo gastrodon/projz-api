@@ -1,5 +1,5 @@
 from __future__ import annotations
-import os
+import os, json
 import httpx
 from ..ext import exceptions
 
@@ -26,7 +26,7 @@ class ZThing:
 
         return self._data
 
-    async def request(self, *args, **kwargs) -> httpx.response:
+    async def request(self, *args, **kwargs) -> dict[str, any]:
         kwargs["headers"] = {
             **self.client.headers,
             **kwargs.get("headers", {}),
@@ -35,10 +35,15 @@ class ZThing:
         async with httpx.AsyncClient() as client:
             response: httpx.response = await client.request(*args, **kwargs)
 
-        if 200 <= response.status_code <= 299:
-            return response.json()
 
-        raise exceptions.APIException(response.json().get("apiMsg", response.text))
+        try:
+            data: dict[str, any] = response.json()
+            if 200 <= response.status_code <= 299:
+                return data
+
+            raise exceptions.APIException(data["debugMsg"], api_code = data["apiCode"])
+        except (json.decoder.JSONDecodeError, KeyError):
+            raise exceptions.APIException(f"{response.status_code}: {response.text}", api_code = 0)
 
     def request_route(self, method: str, route: str, *args, **kwargs) -> httpx.response:
         return self.request(method, f"{self.api}{route}", *args, **kwargs)
