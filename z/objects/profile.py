@@ -47,7 +47,7 @@ class Profile(ZThing):
 
     @property
     def gender(self) -> str:
-        genders: dict[str, any] = {
+        genders: dict[str, str] = {
             0: "female",
             1: "male",
         }
@@ -79,8 +79,8 @@ class Profile(ZThing):
         return self.get("socialId")
 
     @property
-    def social_id_modified(self) -> int:
-        return self.get("socialIdModified")
+    def social_id_modified(self) -> bool:
+        return self.get("socialIdModified", casted = lambda it : it != 2)
 
     @property
     def has_profile(self) -> bool:
