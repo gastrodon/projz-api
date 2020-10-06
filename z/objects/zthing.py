@@ -47,7 +47,7 @@ class ZThing:
         if (fetched := (await self.data).get(key)) != None:
             return casted(fetched)
 
-        return (await self.fresh.data).get(key, default, casted = casted)
+        return casted((await self.fresh.data).get(key, default))
 
     @property
     def fresh(self) -> ZThing:
