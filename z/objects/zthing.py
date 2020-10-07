@@ -62,16 +62,20 @@ class ZThing:
             "page": response.get("pagination", {}).get("nextPageToken"),
         }
 
-    async def paged_generator(self, method: str, route: str, transformer: function = noop) -> generator[any]:
+    async def paged_generator(self, method: str, route: str, transformer: function = noop, **kwargs) -> generator[any]:
         page: str = None
 
         while True:
-            buffer: dict[str, any] = await self.request_paged_route(method, route, transformer = transformer, page = page)
+            buffer: dict[str, any] = await self.request_paged_route(
+                method, route, page = page,
+                transformer = transformer,
+                **kwargs,
+            )
+
             for it in buffer["data"]:
                 yield it
 
-            page = buffer["page"]
-            if not page:
+            if not (page := buffer["page"]):
                 return
 
     async def get(self, key: str, default: any = None, *, casted: any = noop) -> any:

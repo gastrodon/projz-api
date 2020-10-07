@@ -1,4 +1,5 @@
 from __future__ import annotations
+import types
 from .zthing import ZThing
 from .. import objects
 
@@ -50,6 +51,10 @@ class Client(ZThing):
     def profile(self):
         return self._get_self_profile()
 
+    @property
+    def alerts(self) -> dict[str, int]:
+        return self.request_route("GET", "/alerts/check")
+
     async def login(self, email: str = None, phone: str = None, security_code: str = None, *, password: str) -> Client:
         if not email or phone:
             raise ValueError("An email or phone is required")
@@ -89,6 +94,29 @@ class Client(ZThing):
             transformer = lambda it : Profile(it["uid"], data = it, client = self)
         )
 
+    def blogs_slice(self, size: int = 30, page: str = None, type: str = "latest") -> dict[str, any]:
+        from .blog import Blog
+        return self.request_paged_route(
+            "GET",
+            "/blogs",
+            transformer = lambda it : Blog(it["blogId"], data = it, client = self),
+            params = { "type": "latest" },
+        )
+
+
     @property
-    def alerts(self) -> dict[str, int]:
-        return self.request_route("GET", "/alerts/check")
+    def blogs(self) -> Namespace[generator[Blog]]:
+        from .blog import Blog
+        transformer: function = lambda it : Blog(it["blogId"], data = it, client = self)
+
+        return types.SimpleNamespace(
+            latest = self.paged_generator(
+                "GET", "/blogs", params = { "type": "latest" },
+                transformer = transformer,
+            ),
+
+            following = self.paged_generator(
+                "GET", "/blogs", params = { "type": "following" },
+                transformer = transformer,
+            ),
+        )
