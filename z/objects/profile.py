@@ -1,6 +1,5 @@
 from __future__ import annotations
 from .zthing import ZThing
-from .. import objects
 
 class Profile(ZThing):
     def __init__(self, id: str, **kwargs):
