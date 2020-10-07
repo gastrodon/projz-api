@@ -89,6 +89,9 @@ class ZThing:
     def data(self) -> dict[str, any]:
         return self._async_data()
 
+    async def _get_uid(self) -> str:
+        return self.id
+
     @property
     def uid(self) -> str:
-        return self.id
+        return self._get_uid()
