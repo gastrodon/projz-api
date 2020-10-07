@@ -13,7 +13,7 @@ class Profile(ZThing):
         return self.get("chatInvitationStatus")
 
     @property
-    def content_region(self) -> str:
+    def content_region(self) -> int:
         return self.get("contentRegion")
 
     @property
@@ -42,10 +42,7 @@ class Profile(ZThing):
 
     @property
     def gender(self) -> str:
-        genders: dict[str, str] = {
-            0: "female",
-            1: "male",
-        }
+        genders: dict[str, str] = { 0: "female", 1: "male" }
         return self.get("gender", casted = lambda it : genders.get(it, "other"))
 
     @property

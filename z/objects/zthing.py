@@ -7,9 +7,6 @@ noop: function = lambda _ : _
 
 class ZThing:
     api: str = "https://api.projz.com/v1"
-    raw_device_id: str = os.environ.get("Z_RAW_DEVICE_ID", "")
-    os_type: str = "2"
-    device_type: str = "1"
 
     def __init__(self, client: Client = None, data: dict[str, any] = {}) -> ZThing:
         self.client = client if client else __import__("client")

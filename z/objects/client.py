@@ -1,9 +1,13 @@
 from __future__ import annotations
-import types
+import os, types
 from .zthing import ZThing
 from .. import objects
 
 class Client(ZThing):
+    raw_device_id: str = os.environ.get("Z_RAW_DEVICE_ID", "")
+    os_type: str = "2"
+    device_type: str = "1"
+
     def __init__(self, data: dict[str, any] = {}, sid: str = None) -> Client:
         super().__init__(client = self, data = data)
         self._sid: str = sid
@@ -26,8 +30,8 @@ class Client(ZThing):
         return self.get("email")
 
     @property
-    def create_time(self) -> int:
-        return self.get("createTime")
+    def created(self) -> int:
+        return self.get("createdTime")
 
     @property
     def device_id(self) -> str:
@@ -76,13 +80,24 @@ class Client(ZThing):
         self.id = await self.get("uid")
         return self
 
-    def namecard_slice(self, size: int = 30, page: str = None) -> dict[str, any]:
+    def namecards_slice(self, size: int = 30, page: str = None, gender: str = None) -> dict[str, any]:
         from ..objects import Profile
         return self.request_paged_route(
             "GET",
             "/users/namecards",
             size = size, page = page,
-            transformer = lambda it : Profile(it["uid"], data = it, client = self)
+            transformer = lambda it : Profile(it["uid"], data = it, client = self),
+            params = { "gender": { "male": 0, "female": 1 }[gender] } if gender else {},
+        )
+
+    def blogs_slice(self, size: int = 30, page: str = None, type: str = "latest") -> dict[str, any]:
+        from .blog import Blog
+        return self.request_paged_route(
+            "GET",
+            "/blogs",
+            size = size, page = page,
+            transformer = lambda it : Blog(it["blogId"], data = it, client = self),
+            params = { "type": "latest" },
         )
 
     @property
@@ -93,16 +108,6 @@ class Client(ZThing):
             "/users/namecards",
             transformer = lambda it : Profile(it["uid"], data = it, client = self)
         )
-
-    def blogs_slice(self, size: int = 30, page: str = None, type: str = "latest") -> dict[str, any]:
-        from .blog import Blog
-        return self.request_paged_route(
-            "GET",
-            "/blogs",
-            transformer = lambda it : Blog(it["blogId"], data = it, client = self),
-            params = { "type": "latest" },
-        )
-
 
     @property
     def blogs(self) -> Namespace[generator[Blog]]:
