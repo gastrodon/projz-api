@@ -21,10 +21,6 @@ class Client(ZThing):
         }
 
     @property
-    def status(self) -> int:
-        return self.get("status")
-
-    @property
     def email(self) -> str:
         return self.get("email")
 

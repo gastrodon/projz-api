@@ -95,3 +95,7 @@ class ZThing:
     @property
     def uid(self) -> str:
         return self._get_uid()
+
+    @property
+    def status(self) -> int:
+        return self.get("status")

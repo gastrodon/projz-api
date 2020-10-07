@@ -37,10 +37,6 @@ class Profile(ZThing):
         return self.get("friendsCount")
 
     @property
-    def status(self) -> int:
-        return self.get("status")
-
-    @property
     def online_status(self) -> int:
         return self.get("onlineStatus")
 
