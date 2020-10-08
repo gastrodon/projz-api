@@ -1,7 +1,8 @@
 from __future__ import annotations
 from .zthing import ZThing
+from .mixin import Content
 
-class Profile(ZThing):
+class Profile(ZThing, Content):
     def __init__(self, id: str, **kwargs):
         super().__init__(**kwargs)
         self.id = id
@@ -11,19 +12,7 @@ class Profile(ZThing):
     def chat_invitation_status(self) -> int:
         # TODO: is this a bool?
         return self.get("chatInvitationStatus")
-
-    @property
-    def content_region(self) -> int:
-        return self.get("contentRegion")
-
-    @property
-    def content_region_name(self) -> str:
-        return self.get("contentRegionName")
-
-    @property
-    def created(self) -> int:
-        return self.get("createdTime")
-
+        
     @property
     def fan_count(self) -> int:
         return self.get("fansCount")
@@ -46,15 +35,6 @@ class Profile(ZThing):
         return self.get("gender", casted = lambda it : genders.get(it, "other"))
 
     @property
-    def icon(self) -> dict[str, any]:
-        # TODO object to represent media
-        return self.get("icon")
-
-    @property
-    def language(self) -> str:
-        return self.get("language")
-
-    @property
     def location(self) -> dict[str, any]:
         return self.get("location")
 
@@ -65,14 +45,6 @@ class Profile(ZThing):
     @property
     def school(self) -> str:
         return self.get("school")
-
-    @property
-    def social_id(self) -> str:
-        return self.get("socialId")
-
-    @property
-    def social_id_modified(self) -> bool:
-        return self.get("socialIdModified", casted = lambda it : it != 2)
 
     @property
     def has_profile(self) -> bool:
