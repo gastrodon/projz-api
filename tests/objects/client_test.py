@@ -70,6 +70,14 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         next_slice: dict[str, any] = await self.client.circles_slice(size = size, page = slice["page"])
         assert next_slice["data"][0].id != slice["data"][0].id
 
+    async def test_threads_slice(self):
+        size: int = 5
+        slice: dict[str, any] = await self.client.threads_slice(size = size)
+        assert len(slice["data"]) == size
+        assert isinstance(slice["data"][0], z.Thread)
+
+        next_slice: dict[str, any] = await self.client.threads_slice(size = size, page = slice["page"])
+        assert next_slice["data"][0].id != slice["data"][0].id
 
     async def test_namecards(self):
         index: int = 0
@@ -92,6 +100,20 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
 
         async for blog in self.client.blogs.latest:
             collection.append(blog)
+
+            if size == (index := index + 1):
+                break
+
+        assert len(collection) == size
+        assert len(collection) == len(set([it.id for it in collection]))
+
+    async def test_threads(self):
+        index: int = 0
+        size: int = 50
+        collection: list[Thread] = []
+
+        async for thread in self.client.threads.latest:
+            collection.append(thread)
 
             if size == (index := index + 1):
                 break

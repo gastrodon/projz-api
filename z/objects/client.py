@@ -110,10 +110,19 @@ class Client(ZThing):
             params = { "type": type, "uid": joined_id if joined_id else self.id if type == "joined" else "" },
         )
 
+    def threads_slice(self, size: int = 30, page: str = None, type: str = "latest") -> dict[str, any]:
+        from .thread import Thread
+        return self.request_paged_route(
+            "GET", "/chat/threads",
+            size = size, page = page,
+            transformer = lambda it : Thread(it["threadId"], data = it, client = self),
+            params = { "type": type },
+        )
+
     @property
     def namecards(self) -> generator[Profile]:
         from ..objects import Profile
-        
+
         return self.paged_generator(
             "GET",
             "/users/namecards",
@@ -153,4 +162,16 @@ class Client(ZThing):
                 "GET", "/circles", params = { "type": "joined", "uid": self.id },
                 transformer = transformer,
             ),
+        )
+
+    @property
+    def threads(self) -> Namespace[generator[Thread]]:
+        from .thread import Thread
+        transformer: function = lambda it : Thread(it["threadId"], data = it, client = self)
+
+        return types.SimpleNamespace(
+            latest = self.paged_generator(
+                "GET", "/chat/threads", params = { "type": "latest" },
+                transformer = transformer,
+            )
         )
