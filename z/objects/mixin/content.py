@@ -7,6 +7,8 @@ class Content:
 
     @property
     def content_region_name(self) -> str:
+        # Sometimes the content region name is missing,
+        # so I'll have to make a lookup table to fallback
         return self.get("contentRegionName")
 
     @property
