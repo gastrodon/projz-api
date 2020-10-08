@@ -38,9 +38,9 @@ class ZThing:
             if 200 <= response.status_code <= 299:
                 return data
 
-            raise exceptions.APIException(data["debugMsg"], api_code = data["apiCode"])
+            raise exceptions.APIException(data["debugMsg"], api_code = data["apiCode"], response = response)
         except (json.decoder.JSONDecodeError, KeyError):
-            raise exceptions.APIException(f"{response.status_code}: {response.text}", api_code = 0)
+            raise exceptions.APIException(f"{response.status_code}: {response.text}", api_code = 0, response = response)
 
     def request_route(self, method: str, route: str, *args, **kwargs) -> httpx.response:
         return self.request(method, f"{self.api}{route}", *args, **kwargs)
