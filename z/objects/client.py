@@ -100,13 +100,24 @@ class Client(ZThing):
             params = { "type": "latest" },
         )
 
+    def circles_slice(self, size: int = 30, page: str = None, type: str = "latest", joined_id: str = None) -> dict[str, any]:
+        from .circle import Circle
+        return self.request_paged_route(
+            "GET",
+            "/circles",
+            size = size, page = page,
+            transformer = lambda it : Circle(it["circleId"], data = it, client = self),
+            params = { "type": type, "uid": joined_id if joined_id else self.id if type == "joined" else "" },
+        )
+
     @property
     def namecards(self) -> generator[Profile]:
         from ..objects import Profile
+        
         return self.paged_generator(
             "GET",
             "/users/namecards",
-            transformer = lambda it : Profile(it["uid"], data = it, client = self)
+            transformer = lambda it : Profile(it["uid"], data = it, client = self),
         )
 
     @property
@@ -120,8 +131,26 @@ class Client(ZThing):
                 transformer = transformer,
             ),
 
+            # TODO: does this require uid=<user_id> lile circles.joined does?
             following = self.paged_generator(
                 "GET", "/blogs", params = { "type": "following" },
+                transformer = transformer,
+            ),
+        )
+
+    @property
+    def circles(self) -> Namespace[generator[Circle]]:
+        from .circle import Circle
+        transformer: function = lambda it : Circle(it["circleId"], data = it, client = self)
+
+        return types.SimpleNamespace(
+            latest = self.paged_generator(
+                "GET", "/circles", params = { "type": "latest" },
+                transformer = transformer,
+            ),
+
+            joined = self.paged_generator(
+                "GET", "/circles", params = { "type": "joined", "uid": self.id },
                 transformer = transformer,
             ),
         )

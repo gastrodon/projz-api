@@ -61,6 +61,16 @@ class TestClient(unittest.IsolatedAsyncioTestCase):
         next_slice: dict[str, any] = await self.client.blogs_slice(size = size, page = slice["page"])
         assert next_slice["data"][0].id != slice["data"][0].id
 
+    async def test_circles_slice(self):
+        size: int = 5
+        slice: dict[str, any] = await self.client.circles_slice(size = size)
+        assert len(slice["data"]) == size
+        assert isinstance(slice["data"][0], z.Circle)
+
+        next_slice: dict[str, any] = await self.client.circles_slice(size = size, page = slice["page"])
+        assert next_slice["data"][0].id != slice["data"][0].id
+
+
     async def test_namecards(self):
         index: int = 0
         size: int = 50

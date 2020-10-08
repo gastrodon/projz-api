@@ -102,3 +102,12 @@ class Profile(ZThing):
     @property
     def shows_school(self) -> bool:
         return self.get("showsSchool", casted = bool)
+
+    @property
+    def circles(self) -> generator[Circle]:
+        from .circle import Circle
+
+        return self.paged_generator(
+            "GET", "/circles", params = { "type": "joined", "uid": self.id },
+            transformer = lambda it : Circle(it["circleId"], data = it, client = self.client),
+        )
